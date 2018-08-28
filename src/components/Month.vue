@@ -18,7 +18,7 @@
           </thead>
           <tbody>
             <tr class="week">
-              <td class="lead">{{ weekOne(firstDay - 0) }}</td>
+              <td class="lead" ref="day1">{{ weekOne(firstDay - 0) }}</td>
               <td class="lead">{{ weekOne(firstDay - 1) }}</td>
               <td class="lead">{{ weekOne(firstDay - 2) }}</td>
               <td class="lead">{{ weekOne(firstDay - 3) }}</td>
@@ -35,14 +35,26 @@
             <tr class="week">
               <td v-for="day in weekFour" :key="day" class="lead">{{ day }}</td>
             </tr>
-            <tr class="week">
-              <td class="lead">{{ weekFive(lastDay - 0) }}</td>
-              <td class="lead">{{ weekFive(lastDay - 1) }}</td>
-              <td class="lead">{{ weekFive(lastDay - 2) }}</td>
-              <td class="lead">{{ weekFive(lastDay - 3) }}</td>
-              <td class="lead">{{ weekFive(lastDay - 4) }}</td>
-              <td class="lead">{{ weekFive(lastDay - 5) }}</td>
-              <td class="lead">{{ weekFive(lastDay - 6) }}</td>
+            <tr v-if="!extraRow" class="week">
+              <td class="lead">{{ weekLast(lastDay - 0) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 1) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 2) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 3) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 4) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 5) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 6) }}</td>
+            </tr>
+            <tr v-if="extraRow" class="week">
+              <td v-for="day in weekFiveOfSix" :key="day" class="lead">{{ day }}</td>
+            </tr>
+            <tr v-if="extraRow" class="week">
+              <td class="lead">{{ weekLast(lastDay - 0) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 1) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 2) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 3) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 4) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 5) }}</td>
+              <td class="lead">{{ weekLast(lastDay - 6) }}</td>
             </tr>
           </tbody>
         </table>
@@ -61,11 +73,27 @@ export default {
   },
 
   computed: {
+    extraRow () {
+      if (this.firstDay >= 5 && this.daysInMonth === 31) {
+        return true
+      } else if (this.firstDay === 6 && this.daysInMonth === 30) {
+        return true
+      }
+    },
+    daysInMonth () {
+      return Moment().add(this.monthIndex, 'months').daysInMonth()
+    },
     firstDay () {
       return Moment().add(this.monthIndex, 'months').startOf('month').day()
     },
     lastDay () {
       return Moment().add(this.monthIndex, 'months').endOf('month').day()
+    },
+    currentMonthLastDay () {
+      return Moment().add(this.monthIndex, 'months').endOf('month').format('DD')
+    },
+    prevMonthLastDay () {
+      return Moment().subtract(this.monthIndex + 1, 'months').endOf('month').format('DD')
     },
     month () {
       return Moment().add(this.monthIndex, 'months').format('MMMM YYYY')
@@ -75,12 +103,6 @@ export default {
     },
     prevMonth () {
       return Moment().subtract(this.monthIndex + 1, 'months').format('MMMM YYYY')
-    },
-    currentMonthLastDay () {
-      return Moment().add(this.monthIndex, 'months').endOf('month').format('DD')
-    },
-    prevMonthLastDay () {
-      return Moment().subtract(this.monthIndex + 1, 'months').endOf('month').format('DD')
     },
     saturdayDay () {
       return this.weekOne(this.firstDay - 6)
@@ -102,6 +124,13 @@ export default {
     weekFour () {
       let array = []
       for (let i = 15; i < 22; i++) {
+        array.push(this.saturdayDay + i)
+      }
+      return array
+    },
+    weekFiveOfSix () {
+      let array = []
+      for (let i = 22; i < 29; i++) {
         array.push(this.saturdayDay + i)
       }
       return array
@@ -140,7 +169,7 @@ export default {
           return 7
       }
     },
-    weekFive (n) {
+    weekLast (n) {
       let last = this.currentMonthLastDay
       switch (n) {
         case 0:
@@ -183,6 +212,9 @@ export default {
   font-size: .7rem;
   padding: 0;
   margin: 0;
+}
+td:hover {
+  background-color: #efefef;
 }
 .week {
   height: 15vh;
